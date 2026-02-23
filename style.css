@@ -1,51 +1,116 @@
+:root {
+  --primary: #3b82f6;
+  --success: #10b981;
+  --danger: #ef4444;
+  --bg: #f8fafc;
+}
+
 body {
-  background-image: url("image.png");
-  background-size: cover;
-  font-family: monospace;
-  font-weight: bold;
+  background: #e2e8f0 url("image.png") no-repeat center center/cover;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  width: 350px;
   text-align: center;
 }
 
-h1 {
-  margin-top: 10px;
-  margin-bottom: 10px;
+h2 {
+  font-size: 5rem;
+  margin: 0.5rem 0;
+  color: var(--primary);
 }
 
-h2 {
-  font-size: 50px;
-  margin-top: 0;
-  margin-bottom: 20px;
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.row {
+  display: flex;
+  gap: 0.5rem;
+}
+.row button {
+  flex: 1;
 }
 
 button {
   border: none;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  color: white;
+  padding: 12px;
+  border-radius: 8px;
   font-weight: bold;
-  width: 200px;
-  margin-bottom: 5px;
-  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-#increment-btn {
-  background: blue;
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+.btn-outline {
+  background: transparent;
+  border: 2px solid #cbd5e1;
+  color: #64748b;
 }
 
-#save-btn {
-  background: green;
+button:hover {
+  filter: brightness(90%);
+}
+button:active {
+  transform: scale(0.95);
 }
 
-p {
-  font-size: large;
+.history-section {
+  margin-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1rem;
 }
-div {
-  max-width: 100%;
+.table-wrapper {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 1rem;
 }
 
-.counterApp {
-  display: flex;
-  height: 100vh;
-  justify-content: center;
-  align-items: center;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+th {
+  color: #64748b;
+  text-align: left;
+  padding-bottom: 0.5rem;
+}
+td {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+#reset-btn {
+  background-color: chocolate;
+  background: var(--danger);
+  width: 100%;
+  margin-top: 0.5rem;
+  color: white;
 }
