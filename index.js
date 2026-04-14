@@ -1,3 +1,10 @@
+// Event Listeners
+document.getElementById("increment-btn").addEventListener("click", increment);
+document.getElementById("save-btn").addEventListener("click", save);
+document.getElementById("delete-btn").addEventListener("click", undo);
+document.getElementById("download-btn").addEventListener("click", downloadCSV);
+document.getElementById("reset-btn").addEventListener("click", resetAll);
+
 // State
 let count = 0;
 let entries = JSON.parse(localStorage.getItem("savedEntries")) || [];
@@ -83,10 +90,3 @@ function resetAll() {
     updateUI();
   }
 }
-
-// Event Listeners
-document.getElementById("increment-btn").addEventListener("click", increment);
-document.getElementById("save-btn").addEventListener("click", save);
-document.getElementById("delete-btn").addEventListener("click", undo);
-document.getElementById("download-btn").addEventListener("click", downloadCSV);
-document.getElementById("reset-btn").addEventListener("click", resetAll);
