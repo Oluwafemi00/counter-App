@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Counter Logger</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne+Mono&family=Syne:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #111010;
+        --surface: #1a1918;
+        --surface2: #232120;
+        --surface3: #2c2a28;
+        --border: #333130;
+        --border2: #403e3c;
+        --text: #f5f0e8;
+        --text2: #8a8580;
+        --text3: #55524f;
+        --accent: #e8c84a;
+        --accent-dim: #2e2810;
+        --green: #5dd68c;
+        --green-dim: #1a3528;
+        --red: #e85d5d;
+        --red-dim: #351a1a;
+        --radius: 12px;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Syne", sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 24px;
+        /* subtle grid texture */
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+          linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.015) 1px,
+            transparent 1px
+          );
+        background-size: 40px 40px;
+      }
+
+      .shell {
+        width: 100%;
+        max-width: 380px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      /* HEADER */
+      .header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        padding: 0 2px;
+      }
+      .wordmark {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--text3);
+      }
+      .session-badge {
+        font-family: "Syne Mono", monospace;
+        font-size: 10px;
+        color: var(--text3);
+        border: 1px solid var(--border);
+        padding: 3px 8px;
+        border-radius: 4px;
+      }
+
+      /* COUNT DISPLAY */
+      .count-panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px 24px 28px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .count-panel::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse 60% 40% at 50% 0%,
+          rgba(232, 200, 74, 0.06) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .count-label {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--text3);
+        margin-bottom: 12px;
+      }
+      .count-number {
+        font-family: "Syne Mono", monospace;
+        font-size: 88px;
+        line-height: 1;
+        color: var(--accent);
+        letter-spacing: -4px;
+        transition:
+          transform 0.08s ease,
+          color 0.2s;
+        display: block;
+        text-shadow: 0 0 40px rgba(232, 200, 74, 0.25);
+      }
+      .count-number.bump {
+        animation: bump 0.12s ease;
+      }
+      @keyframes bump {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.06);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      .count-sub {
+        font-family: "Syne Mono", monospace;
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 10px;
+      }
+
+      /* RING PROGRESS */
+      .ring-wrap {
+        display: flex;
+        justify-content: center;
+        margin: 14px 0 6px;
+      }
+      .ring-svg {
+        opacity: 0.4;
+      }
+      .ring-track {
+        fill: none;
+        stroke: var(--surface3);
+        stroke-width: 3;
+      }
+      .ring-fill {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-dasharray: 188;
+        stroke-dashoffset: 188;
+        transform: rotate(-90deg);
+        transform-origin: center;
+        transition: stroke-dashoffset 0.3s ease;
+      }
+
+      /* INCREMENT BTN */
+      .btn-increment {
+        width: 100%;
+        height: 72px;
+        background: var(--accent);
+        color: #111010;
+        border: none;
+        border-radius: 14px;
+        font-family: "Syne", sans-serif;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition:
+          transform 0.1s,
+          filter 0.15s;
+        box-shadow:
+          0 4px 0 rgba(0, 0, 0, 0.4),
+          0 8px 24px rgba(232, 200, 74, 0.15);
+      }
+      .btn-increment::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.12) 0%,
+          transparent 60%
+        );
+        pointer-events: none;
+      }
+      .btn-increment:hover {
+        filter: brightness(1.08);
+      }
+      .btn-increment:active {
+        transform: translateY(3px);
+        box-shadow:
+          0 1px 0 rgba(0, 0, 0, 0.4),
+          0 3px 12px rgba(232, 200, 74, 0.1);
+      }
+
+      /* RIPPLE */
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.2);
+        transform: scale(0);
+        animation: ripple-out 0.4s ease-out forwards;
+        pointer-events: none;
+      }
+      @keyframes ripple-out {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+
+      /* ACTION ROW */
+      .action-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .btn-action {
+        height: 48px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border2);
+        background: var(--surface2);
+        font-family: "Syne", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+        color: var(--text2);
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+      }
+      .btn-action:hover {
+        background: var(--surface3);
+        color: var(--text);
+        border-color: var(--text3);
+      }
+      .btn-action:active {
+        transform: scale(0.97);
+      }
+      .btn-action.save {
+        background: var(--green-dim);
+        border-color: var(--green);
+        color: var(--green);
+      }
+      .btn-action.save:hover {
+        background: #224030;
+      }
+      .btn-action.del {
+        background: var(--red-dim);
+        border-color: var(--red);
+        color: var(--red);
+      }
+      .btn-action.del:hover {
+        background: #442020;
+      }
+
+      .action-row2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      /* HISTORY PANEL */
+      .history-panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .history-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+      }
+      .history-title {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--text3);
+      }
+      .total-chip {
+        font-family: "Syne Mono", monospace;
+        font-size: 11px;
+        color: var(--accent);
+        background: var(--accent-dim);
+        border: 1px solid rgba(232, 200, 74, 0.2);
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+      .history-body {
+        max-height: 180px;
+        overflow-y: auto;
+      }
+      .history-body::-webkit-scrollbar {
+        width: 3px;
+      }
+      .history-body::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .history-body::-webkit-scrollbar-thumb {
+        background: var(--border2);
+        border-radius: 2px;
+      }
+
+      .entry-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 18px;
+        border-bottom: 1px solid var(--border);
+        animation: fadeSlide 0.2s ease;
+      }
+      .entry-row:last-child {
+        border-bottom: none;
+      }
+      @keyframes fadeSlide {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .entry-time {
+        font-family: "Syne Mono", monospace;
+        font-size: 11px;
+        color: var(--text3);
+      }
+      .entry-bar-wrap {
+        flex: 1;
+        margin: 0 12px;
+        height: 3px;
+        background: var(--surface3);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .entry-bar {
+        height: 100%;
+        background: var(--accent);
+        border-radius: 2px;
+        opacity: 0.4;
+      }
+      .entry-val {
+        font-family: "Syne Mono", monospace;
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--text);
+        min-width: 28px;
+        text-align: right;
+      }
+      .empty-row {
+        padding: 28px;
+        text-align: center;
+        font-family: "Syne Mono", monospace;
+        font-size: 11px;
+        color: var(--text3);
+        letter-spacing: 0.1em;
+      }
+
+      /* FOOTER ROW */
+      .footer-row {
+        display: flex;
+        justify-content: center;
+      }
+      .btn-link {
+        background: none;
+        border: none;
+        font-family: "Syne", sans-serif;
+        font-size: 11px;
+        color: var(--text3);
+        cursor: pointer;
+        letter-spacing: 0.06em;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: color 0.15s;
+        text-decoration: none;
+      }
+      .btn-link:hover {
+        color: var(--red);
+      }
+
+      /* ICON SVGs inline */
+      svg.icon {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex-shrink: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="header">
+        <span class="wordmark">Counter Logger</span>
+        <span class="session-badge" id="session-label">SESSION —</span>
+      </div>
+
+      <!-- COUNT DISPLAY -->
+      <div class="count-panel">
+        <p class="count-label">Current Count</p>
+        <span class="count-number" id="count-el">0</span>
+        <div class="ring-wrap">
+          <svg class="ring-svg" width="64" height="64" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="30" />
+            <circle class="ring-fill" id="ring-fill" cx="32" cy="32" r="30" />
+          </svg>
+        </div>
+        <p class="count-sub" id="count-sub">tap to start counting</p>
+      </div>
+
+      <!-- INCREMENT -->
+      <button class="btn-increment" id="increment-btn">
+        <span>+ Increment</span>
+      </button>
+
+      <!-- SAVE / DELETE -->
+      <div class="action-row">
+        <button class="btn-action save" id="save-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path
+              d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"
+            />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
+          Save Entry
+        </button>
+        <button class="btn-action del" id="delete-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+            <path d="M10 11v6M14 11v6" />
+          </svg>
+          Remove Last
+        </button>
+      </div>
+
+      <div class="action-row2">
+        <button class="btn-action" id="download-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Export CSV
+        </button>
+        <button class="btn-action" id="reset-btn">
+          <svg class="icon" viewBox="0 0 24 24">
+            <polyline points="1 4 1 10 7 10" />
+            <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+          </svg>
+          Reset All
+        </button>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="history-panel">
+        <div class="history-head">
+          <span class="history-title">Session History</span>
+          <span class="total-chip" id="total-chip">Total: 0</span>
+        </div>
+        <div class="history-body" id="history-body"></div>
+      </div>
+
+      <div class="footer-row">
+        <button class="btn-link" id="clear-history-btn">
+          Clear all history
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const countEl = document.getElementById("count-el");
+      const historyBody = document.getElementById("history-body");
+      const totalChip = document.getElementById("total-chip");
+      const countSub = document.getElementById("count-sub");
+      const sessionLabel = document.getElementById("session-label");
+      const ringFill = document.getElementById("ring-fill");
+
+      let count = 0;
+      let entries = JSON.parse(localStorage.getItem("counterEntries") || "[]");
+
+      // Session ID
+      const sessionNum =
+        parseInt(localStorage.getItem("sessionNum") || "0") + 1;
+      localStorage.setItem("sessionNum", sessionNum);
+      sessionLabel.textContent = `SESSION ${String(sessionNum).padStart(3, "0")}`;
+
+      // RING: 0–100 maps to stroke-dashoffset 188–0 (circumference ≈ 188)
+      const CIRC = 188;
+      function updateRing(val, max) {
+        const pct = Math.min(val / Math.max(max, 1), 1);
+        ringFill.style.strokeDashoffset = CIRC - pct * CIRC;
+      }
+
+      function refreshCount() {
+        countEl.textContent = count;
+        const maxSeen = entries.length
+          ? Math.max(...entries.map((e) => e.value), count)
+          : Math.max(count, 1);
+        updateRing(count, maxSeen);
+        if (count === 0) countSub.textContent = "tap to start counting";
+        else if (count < 5) countSub.textContent = "keep going…";
+        else if (count < 20) countSub.textContent = "on a roll";
+        else countSub.textContent = "looking good!";
+      }
+
+      function renderHistory() {
+        const maxVal = entries.length
+          ? Math.max(...entries.map((e) => e.value))
+          : 1;
+        const total = entries.reduce((s, e) => s + e.value, 0);
+        totalChip.textContent = `Total: ${total}`;
+
+        if (!entries.length) {
+          historyBody.innerHTML = '<div class="empty-row">no entries yet</div>';
+          return;
+        }
+
+        historyBody.innerHTML = [...entries]
+          .reverse()
+          .map(
+            (e) => `
+      <div class="entry-row">
+        <span class="entry-time">${e.time}</span>
+        <div class="entry-bar-wrap"><div class="entry-bar" style="width:${Math.round((e.value / maxVal) * 100)}%"></div></div>
+        <span class="entry-val">${e.value}</span>
+      </div>
+    `,
+          )
+          .join("");
+      }
+
+      // INCREMENT with ripple
+      document
+        .getElementById("increment-btn")
+        .addEventListener("click", function (e) {
+          count++;
+          countEl.classList.remove("bump");
+          void countEl.offsetWidth;
+          countEl.classList.add("bump");
+          refreshCount();
+
+          // ripple
+          const btn = this;
+          const r = document.createElement("span");
+          r.className = "ripple";
+          const d = Math.max(btn.offsetWidth, btn.offsetHeight);
+          const rect = btn.getBoundingClientRect();
+          r.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - rect.left - d / 2}px;top:${e.clientY - rect.top - d / 2}px`;
+          btn.appendChild(r);
+          setTimeout(() => r.remove(), 400);
+        });
+
+      document.getElementById("save-btn").addEventListener("click", () => {
+        if (count === 0) return;
+        const now = new Date();
+        const time = now.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+        entries.push({ time, value: count });
+        count = 0;
+        localStorage.setItem("counterEntries", JSON.stringify(entries));
+        refreshCount();
+        renderHistory();
+      });
+
+      document.getElementById("delete-btn").addEventListener("click", () => {
+        if (!entries.length) return;
+        entries.pop();
+        localStorage.setItem("counterEntries", JSON.stringify(entries));
+        renderHistory();
+      });
+
+      document.getElementById("download-btn").addEventListener("click", () => {
+        if (!entries.length) {
+          return;
+        }
+        let csv =
+          "Time,Count\n" +
+          entries.map((e) => `${e.time},${e.value}`).join("\n");
+        const a = Object.assign(document.createElement("a"), {
+          href: URL.createObjectURL(new Blob([csv], { type: "text/csv" })),
+          download: `counter_${new Date().toLocaleDateString().replace(/\//g, "-")}.csv`,
+        });
+        a.click();
+      });
+
+      document.getElementById("reset-btn").addEventListener("click", () => {
+        if (!confirm("Reset current count and all history?")) return;
+        count = 0;
+        entries = [];
+        localStorage.removeItem("counterEntries");
+        refreshCount();
+        renderHistory();
+      });
+
+      document
+        .getElementById("clear-history-btn")
+        .addEventListener("click", () => {
+          if (!entries.length) return;
+          if (!confirm("Clear all saved entries?")) return;
+          entries = [];
+          localStorage.removeItem("counterEntries");
+          renderHistory();
+        });
+
+      // Keyboard: Space to increment, Enter to save
+      document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "BUTTON") return;
+        if (e.code === "Space") {
+          e.preventDefault();
+          document.getElementById("increment-btn").click();
+        }
+        if (e.code === "Enter") {
+          e.preventDefault();
+          document.getElementById("save-btn").click();
+        }
+      });
+
+      // Init
+      refreshCount();
+      renderHistory();
+    </script>
+  </body>
+</html>
