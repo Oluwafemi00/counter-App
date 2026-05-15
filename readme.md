@@ -49,7 +49,7 @@ Counter Logger is a precision tally tool designed for anyone who needs to count 
 ## Project Structure
 
 ```
-counter-logger.html      ← Complete app: HTML + embedded CSS + embedded JS
+index.html      ← Complete app: HTML + embedded CSS + embedded JS
 ```
 
 ---
@@ -66,7 +66,7 @@ counter-logger.html      ← Complete app: HTML + embedded CSS + embedded JS
 ## Run Locally
 
 ```bash
-open counter-logger.html
+open index.html
 ```
 
 ---
